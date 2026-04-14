@@ -9,7 +9,7 @@
         .drug-container { margin-top: 20px; }
         /* 分类标签栏 */
         .category-bar { display: flex; gap: 15px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; }
-        .cat-tag { padding: 8px 20px; background: #fff; border-radius: 20px; color: #7f8c8d; cursor: pointer; transition: 0.3s; white-space: nowrap; border: 1px solid #eee; }
+        .cat-tag { padding: 8px 20px; background: #fff; border-radius: 20px; color: #7f8c8d; cursor: pointer; transition: 0.3s; white-space: nowrap; border: 1px solid #eee; text-decoration: none;}
         .cat-tag.active { background: #4facfe; color: #fff; border-color: #4facfe; box-shadow: 0 4px 10px rgba(79, 172, 254, 0.3); }
 
         /* 药品卡片布局 */
@@ -19,7 +19,7 @@
         .drug-name { font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 5px; }
         .drug-spec { font-size: 13px; color: #95a5a6; margin-bottom: 15px; }
         .info-label { font-size: 12px; color: #4facfe; font-weight: bold; margin-bottom: 4px; }
-        .info-text { font-size: 13px; color: #576574; line-height: 1.5; margin-bottom: 12px; }
+        .info-text { font-size: 13px; color: #576574; line-height: 1.5; margin-bottom: 12px; white-space: pre-wrap; }
 
         .price-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f8f9fa; padding-top: 15px; margin-top: 10px; }
         .price-val { font-size: 20px; color: #e74c3c; font-weight: bold; }
@@ -34,15 +34,15 @@
     <div class="search-section" style="margin-bottom: 25px;">
         <form action="/user/drug" method="get" style="display: flex; gap: 10px;">
             <input type="text" name="keyword" value="${keyword}" placeholder="搜索药品名称、主治功能..." style="flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #eee; outline: none;">
-            <button type="submit" class="btn-fill" style="width: 100px; border-radius: 25px;">搜索</button>
+            <button type="submit" class="btn-fill" style="width: 100px; border-radius: 25px; border: none; background: #4facfe; color: white; cursor: pointer;">搜索</button>
         </form>
     </div>
 
     <div class="category-bar">
         <a href="/user/drug" class="cat-tag ${empty currentCategory ? 'active' : ''}">全部药品</a>
-        <a href="/user/drug?category=抗生素" class="cat-tag ${currentCategory == '抗生素' ? 'active' : ''}">抗生素</a>
-        <a href="/user/drug?category=解热镇痛" class="cat-tag ${currentCategory == '解热镇痛' ? 'active' : ''}">解热镇痛</a>
-        <a href="/user/drug?category=感冒用药" class="cat-tag ${currentCategory == '感冒用药' ? 'active' : ''}">感冒用药</a>
+        <c:forEach items="${categories}" var="c">
+            <a href="/user/drug?category=${c.name}" class="cat-tag ${currentCategory == c.name ? 'active' : ''}">${c.name}</a>
+        </c:forEach>
     </div>
 
     <div class="drug-grid">
@@ -52,10 +52,10 @@
                 <div class="drug-spec">${d.spec} / ${d.manufacturer}</div>
 
                 <div class="info-label">【主要成分】</div>
-                <div class="info-text">${empty d.ingredients ? '详见说明书' : d.ingredients}</div>
+                <div class="info-text"><c:out value="${empty d.ingredients ? '详见说明书' : d.ingredients}"/></div>
 
                 <div class="info-label">【用法用量】</div>
-                <div class="info-text">${empty d.usageInfo ? '请遵医嘱使用' : d.usageInfo}</div>
+                <div class="info-text"><c:out value="${empty d.usageInfo ? '请遵医嘱使用' : d.usageInfo}"/></div>
 
                 <div class="price-row">
                     <div class="price-val">¥ ${d.price} <span style="font-size: 12px; color: #999; font-weight: normal;">/${d.unit}</span></div>
@@ -63,6 +63,9 @@
                 </div>
             </div>
         </c:forEach>
+        <c:if test="${empty list}">
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px; color: #ccc;">该分类下暂无药品记录</div>
+        </c:if>
     </div>
 </div>
 

@@ -1,50 +1,71 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
+<%@ page import="com.ssmshequ.entity.Doctor" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%
+    Doctor _d = (Doctor)session.getAttribute("loginUser");
+    if(_d == null){ response.sendRedirect("/login"); return; }
+%>
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
     <title>医生工作台 - 首页</title>
-    <style><%@ include file="/WEB-INF/jsp/doctor/common/style.css" %></style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        <%@ include file="/WEB-INF/jsp/doctor/common/style.css" %>
+        /* 针对首页欢迎卡片的特殊补充样式 */
+        .welcome-card { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; padding: 28px 32px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 10px 25px rgba(14,165,233,0.2); }
+        .welcome-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        .welcome-sub { font-size: 14px; opacity: 0.9; }
+    </style>
 </head>
 <body>
-<%@ include file="/WEB-INF/jsp/doctor/common/header.jsp" %>
 <%@ include file="/WEB-INF/jsp/doctor/common/sidebar.jsp" %>
+<div class="main">
+    <%@ include file="/WEB-INF/jsp/doctor/common/header.jsp" %>
+    <div class="content">
 
-<div class="main-content">
-    <div class="welcome-box" style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; padding: 30px; border-radius: 15px; margin-bottom: 30px;">
-        <h2>您好，${loginUser.name} 医生 👨‍⚕️</h2>
-        <p>欢迎回到系统。守护社区健康，您辛苦了。</p>
-        <p style="margin-top:10px; opacity:0.8;">当前时间：<fmt:formatDate value="<%= new java.util.Date() %>" pattern="yyyy年MM月dd日 E"/></p>
-    </div>
-
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-        <div class="stat-card" style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid #3498db;">
-            <div style="color: #888; font-size: 14px; margin-bottom: 10px;">今日预约人数</div>
-            <div style="font-size: 32px; font-weight: bold; color: #2c3e50;">${todayCount}</div>
+        <div class="welcome-card">
+            <div class="welcome-title">您好，${loginUser.name} 医生 👨‍⚕️</div>
+            <div class="welcome-sub">欢迎回到系统。守护社区健康，您辛苦了。当前时间：<fmt:formatDate value="<%= new java.util.Date() %>" pattern="yyyy年MM月dd日 E"/></div>
         </div>
 
-        <div class="stat-card" style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid #e74c3c;">
-            <div style="color: #888; font-size: 14px; margin-bottom: 10px;">待处理预约</div>
-            <div style="font-size: 32px; font-weight: bold; color: #e74c3c;">${appointCount}</div>
-        </div>
+        <div class="stats-grid">
+            <div class="stat-card" style="border-bottom: 4px solid var(--accent);">
+                <div class="s-icon">📅</div>
+                <div class="label">今日预约人数</div>
+                <div class="value" style="color: var(--accent);">${todayCount}</div>
+            </div>
 
-        <div class="stat-card" style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid #f1c40f;">
-            <div style="color: #888; font-size: 14px; margin-bottom: 10px;">综合满意度</div>
-            <div style="font-size: 32px; font-weight: bold; color: #f1c40f;">
-                <fmt:formatNumber value="${avgScore}" pattern="0.0"/> <small style="font-size:16px; color:#999;">/ 5.0</small>
+            <div class="stat-card" style="border-bottom: 4px solid var(--danger);">
+                <div class="s-icon">⏳</div>
+                <div class="label">待处理预约</div>
+                <div class="value" style="color: var(--danger);">${appointCount}</div>
+            </div>
+
+            <div class="stat-card" style="border-bottom: 4px solid var(--warning);">
+                <div class="s-icon">⭐</div>
+                <div class="label">综合满意度</div>
+                <div class="value" style="color: var(--warning);">
+                    <fmt:formatNumber value="${avgScore}" pattern="0.0"/>
+                    <span style="font-size: 14px; color: var(--text-muted);">/ 5.0</span>
+                </div>
+            </div>
+
+            <div class="stat-card" style="border-bottom: 4px solid var(--warning);">
+                <div class="s-icon">💬</div>
+                <div class="label">患者评价数</div>
+                <div class="value" style="color: var(--warning);">${evalCount} <span style="font-size: 14px; color: var(--text-muted);">条</span></div>
+            </div>
+
+            <div class="stat-card" style="border-bottom: 4px solid var(--success);">
+                <div class="s-icon">📋</div>
+                <div class="label">累计诊断病例</div>
+                <div class="value" style="color: var(--success);">${caseCount}</div>
             </div>
         </div>
 
-        <div class="stat-card" style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid #e67e22;">
-            <div style="color: #888; font-size: 14px; margin-bottom: 10px;">患者评价数</div>
-            <div style="font-size: 32px; font-weight: bold; color: #e67e22;">${evalCount} <small style="font-size:16px; color:#999;">条</small></div>
-        </div>
-
-        <div class="stat-card" style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 5px solid #2ecc71;">
-            <div style="color: #888; font-size: 14px; margin-bottom: 10px;">累计诊断病例</div>
-            <div style="font-size: 32px; font-weight: bold; color: #2ecc71;">${caseCount}</div>
-        </div>
     </div>
 </div>
 </body>

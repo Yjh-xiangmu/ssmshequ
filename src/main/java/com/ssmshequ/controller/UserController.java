@@ -22,6 +22,7 @@ public class UserController {
     @Autowired private HealthRecordMapper healthRecordMapper;
     @Autowired private EvaluationMapper evaluationMapper;
     @Autowired private DrugFavoriteMapper drugFavoriteMapper;
+    @Autowired private BaseDataMapper baseDataMapper;
     private User getLoginUser(HttpSession session) {
         if (!"user".equals(session.getAttribute("role"))) return null;
         return (User) session.getAttribute("loginUser");
@@ -126,6 +127,7 @@ public class UserController {
         model.addAttribute("list", list);
         model.addAttribute("favMapper", drugFavoriteMapper);
         model.addAttribute("currentCategory", category);
+        model.addAttribute("categories", baseDataMapper.listByType("drug_category"));
         return "user/drug";
     }
 
