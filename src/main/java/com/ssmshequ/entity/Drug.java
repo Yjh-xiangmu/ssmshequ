@@ -1,6 +1,5 @@
 package com.ssmshequ.entity;
 
-// 必须加这个导入
 import org.springframework.format.annotation.DateTimeFormat;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -15,30 +14,50 @@ public class Drug {
     private BigDecimal price;
     private String manufacturer;
 
-    // 关键修复：告诉 Spring 按照年-月-日的格式来接收前端传来的日期
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date expireDate;
 
     private String remark;
 
+    // 新增字段：成分与用法
+    private String ingredients;
+    private String usageInfo;
+
+    // --- Getter and Setter ---
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
     public String getSpec() { return spec; }
     public void setSpec(String spec) { this.spec = spec; }
+
     public String getUnit() { return unit; }
     public void setUnit(String unit) { this.unit = unit; }
+
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }
+
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+
     public String getManufacturer() { return manufacturer; }
     public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
+
     public Date getExpireDate() { return expireDate; }
     public void setExpireDate(Date expireDate) { this.expireDate = expireDate; }
+
     public String getRemark() { return remark; }
     public void setRemark(String remark) { this.remark = remark; }
+
+    public String getIngredients() { return ingredients; }
+    public void setIngredients(String ingredients) { this.ingredients = ingredients; }
+
+    public String getUsageInfo() { return usageInfo; }
+    public void setUsageInfo(String usageInfo) { this.usageInfo = usageInfo; }
 }

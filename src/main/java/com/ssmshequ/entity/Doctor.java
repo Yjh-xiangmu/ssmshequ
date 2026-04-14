@@ -12,7 +12,12 @@ public class Doctor {
     private String title;
     private String intro;
     private Integer status;
-
+    private Double avgScore;   // 综合评分
+    private Integer evalCount; // 评价总数
+    public Double getAvgScore() { return avgScore; }
+    public void setAvgScore(Double avgScore) { this.avgScore = avgScore; }
+    public Integer getEvalCount() { return evalCount; }
+    public void setEvalCount(Integer evalCount) { this.evalCount = evalCount; }
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getJobNumber() { return jobNumber; }

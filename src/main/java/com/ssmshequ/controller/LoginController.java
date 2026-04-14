@@ -1,8 +1,10 @@
 package com.ssmshequ.controller;
 
 import com.ssmshequ.entity.Admin;
+import com.ssmshequ.entity.Doctor;
 import com.ssmshequ.entity.User;
 import com.ssmshequ.mapper.AdminMapper;
+import com.ssmshequ.mapper.DoctorMapper;
 import com.ssmshequ.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -15,31 +17,19 @@ import javax.servlet.http.HttpSession;
 @Controller
 public class LoginController {
 
-    @Autowired
-    private AdminMapper adminMapper;
+    @Autowired private AdminMapper adminMapper;
+    @Autowired private UserMapper userMapper;
+    @Autowired private DoctorMapper doctorMapper;
 
-    @Autowired
-    private UserMapper userMapper;
-
-    // 根路径直接跳转到登录页
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String root() {
-        return "redirect:/login";
-    }
+    public String root() { return "redirect:/login"; }
 
-    // 登录页面
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String toLogin() {
-        return "login";
-    }
+    public String toLogin() { return "login"; }
 
-    // 注册页面
     @RequestMapping(value = "/register", method = RequestMethod.GET)
-    public String toRegister() {
-        return "register";
-    }
+    public String toRegister() { return "register"; }
 
-    // 登录逻辑
     @RequestMapping(value = "/doLogin", method = RequestMethod.POST)
     public String doLogin(String username, String password, String role,
                           HttpSession session, Model model) {
@@ -50,6 +40,13 @@ public class LoginController {
                 session.setAttribute("role", "admin");
                 return "redirect:/admin/index";
             }
+        } else if ("doctor".equals(role)) {
+            Doctor doctor = doctorMapper.login(username, password);
+            if (doctor != null) {
+                session.setAttribute("loginUser", doctor);
+                session.setAttribute("role", "doctor");
+                return "redirect:/doctor/index";
+            }
         } else if ("user".equals(role)) {
             User user = userMapper.login(username, password);
             if (user != null) {
@@ -57,16 +54,11 @@ public class LoginController {
                 session.setAttribute("role", "user");
                 return "redirect:/user/index";
             }
-        } else if ("doctor".equals(role)) {
-            // TODO: 医生登录 —— 等 Doctor 实体和 Mapper 完善后接入
-            model.addAttribute("msg", "医生模块开发中，敬请期待");
-            return "login";
         }
         model.addAttribute("msg", "账号或密码错误，请重试");
         return "login";
     }
 
-    // 注册逻辑
     @RequestMapping(value = "/doRegister", method = RequestMethod.POST)
     public String doRegister(User user, Model model) {
         int count = userMapper.checkUsername(user.getUsername());
@@ -79,7 +71,6 @@ public class LoginController {
         return "login";
     }
 
-    // 退出登录
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public String logout(HttpSession session) {
         session.invalidate();

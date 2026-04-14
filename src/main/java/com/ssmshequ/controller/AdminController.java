@@ -109,6 +109,10 @@ public class AdminController {
                 ? drugMapper.search(keyword) : drugMapper.listAll();
         model.addAttribute("list", list);
         model.addAttribute("keyword", keyword);
+
+        // 关键修复：把药品分类从基础数据里查出来，传给前端的下拉框
+        model.addAttribute("categories", baseDataMapper.listByType("drug_category"));
+
         return "admin/drug";
     }
 
@@ -298,7 +302,6 @@ public class AdminController {
     public String profileSave(Admin admin, HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
         adminMapper.update(admin);
-        // 更新 session 中的用户信息
         Admin updated = adminMapper.getById(admin.getId());
         session.setAttribute("loginUser", updated);
         return "redirect:/admin/profile";
