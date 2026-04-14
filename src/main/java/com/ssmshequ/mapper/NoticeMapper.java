@@ -7,10 +7,21 @@ import java.util.List;
 
 public interface NoticeMapper {
 
+    // 加上字段映射规则，把带有下划线的数据库字段和 Java 实体类对应起来
     @Select("SELECT * FROM notice ORDER BY is_top DESC, create_time DESC")
+    @Results(id = "noticeMap", value = {
+            @Result(property = "id", column = "id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "content", column = "content"),
+            @Result(property = "category", column = "category"),
+            @Result(property = "isTop", column = "is_top"),
+            @Result(property = "status", column = "status"),
+            @Result(property = "createTime", column = "create_time")
+    })
     List<Notice> listAll();
 
     @Select("SELECT * FROM notice WHERE id=#{id}")
+    @ResultMap("noticeMap")
     Notice getById(Integer id);
 
     @Insert("INSERT INTO notice(title,content,category,is_top,status) " +

@@ -1,12 +1,17 @@
 package com.ssmshequ.entity;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 public class MedicalCase {
     private Integer id;
     private Integer userId;
     private Integer doctorId;
+
+    // 加上注解
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date visitDate;
+
     private String chiefComplaint;
     private String diagnosis;
     private String prescription;
@@ -14,7 +19,6 @@ public class MedicalCase {
     private Integer status;
     private Date createTime;
 
-    // 关联查询用（非数据库字段）
     private String userName;
     private String doctorName;
     private String userPhone;

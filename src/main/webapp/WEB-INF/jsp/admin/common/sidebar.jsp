@@ -1,3 +1,4 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <%@ page import="com.ssmshequ.entity.Admin" %>
 <%
     Admin _loginUser = (Admin) session.getAttribute("loginUser");

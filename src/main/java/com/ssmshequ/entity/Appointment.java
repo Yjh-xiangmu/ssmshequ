@@ -1,18 +1,22 @@
 package com.ssmshequ.entity;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 public class Appointment {
     private Integer id;
     private Integer userId;
     private Integer doctorId;
+
+    // 加上注解
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date appointDate;
+
     private String appointTime;
     private String reason;
-    private Integer status;  // 0待确认 1已确认 2已取消 3已完成
+    private Integer status;
     private Date createTime;
 
-    // 关联查询用
     private String userName;
     private String userPhone;
     private String doctorName;

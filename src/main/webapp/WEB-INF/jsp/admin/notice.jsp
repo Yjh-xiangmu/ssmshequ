@@ -33,7 +33,8 @@
                 <td><span class="tag ${n.status == 1 ? 'tag-green' : 'tag-yellow'}">${n.status == 1 ? '已发布' : '草稿'}</span></td>
                 <td><fmt:formatDate value="${n.createTime}" pattern="yyyy-MM-dd HH:mm"/></td>
                 <td>
-                    <button class="btn btn-edit btn-sm" onclick="openEdit(${n.id},'${n.title}','${n.category}',${n.isTop},${n.status},'${n.content}')">编辑</button>
+                    <textarea id="content_${n.id}" style="display:none;">${n.content}</textarea>
+                    <button class="btn btn-edit btn-sm" onclick="openEdit(${n.id},'${n.title}','${n.category}',${n.isTop},${n.status})">编辑</button>
                     <a href="/admin/notice/delete?id=${n.id}" class="btn btn-danger btn-sm" onclick="return confirm('确认删除？')">删除</a>
                 </td>
             </tr>
@@ -107,13 +108,14 @@
 <script>
 function openAdd() { document.getElementById('addModal').classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function openEdit(id,title,cat,isTop,status,content) {
+function openEdit(id,title,cat,isTop,status) {
     document.getElementById('eId').value=id;
     document.getElementById('eTitle').value=title;
     document.getElementById('eCategory').value=cat;
     document.getElementById('eIsTop').value=isTop;
     document.getElementById('eStatus').value=status;
-    document.getElementById('eContent').value=content;
+    // 从刚才的隐藏框里拿取完整内容，这样就不会报错了
+    document.getElementById('eContent').value = document.getElementById('content_' + id).value;
     document.getElementById('editModal').classList.add('show');
 }
 document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('show'); }));

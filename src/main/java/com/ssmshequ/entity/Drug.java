@@ -1,5 +1,7 @@
 package com.ssmshequ.entity;
 
+// 必须加这个导入
+import org.springframework.format.annotation.DateTimeFormat;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -12,7 +14,11 @@ public class Drug {
     private Integer stock;
     private BigDecimal price;
     private String manufacturer;
+
+    // 关键修复：告诉 Spring 按照年-月-日的格式来接收前端传来的日期
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date expireDate;
+
     private String remark;
 
     public Integer getId() { return id; }
