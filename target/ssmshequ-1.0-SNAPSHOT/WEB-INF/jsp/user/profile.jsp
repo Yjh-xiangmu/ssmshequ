@@ -8,24 +8,26 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8"><title>个人中心 - 社区健康中心</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-<style><%@ include file="/WEB-INF/jsp/user/common/style.css" %></style>
+    <meta charset="UTF-8"><title>个人中心 - 社区健康中心</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style><%@ include file="/WEB-INF/jsp/user/common/style.css" %></style>
 </head>
 <body>
 <%@ include file="/WEB-INF/jsp/user/common/topbar.jsp" %>
 <div class="main-wrap">
     <div class="page-title">个人中心</div>
-    <div class="page-sub">管理个人档案与健康信息，修改密码。</div>
+    <div class="page-sub">管理个人档案与健康信息，查看收藏记录。</div>
 
-    <!-- 基本信息 -->
     <div class="profile-card">
-        <div class="profile-avatar-row">
-            <div class="profile-avatar"><%= loginUser.getName()!=null?loginUser.getName().substring(0,1):"居" %></div>
-            <div>
-                <div style="font-size:20px;font-weight:700;"><%= loginUser.getName()!=null?loginUser.getName():loginUser.getUsername() %></div>
-                <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">账号：<%= loginUser.getUsername() %> &nbsp;|&nbsp; 社区居民</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
+            <div class="profile-avatar-row" style="margin-bottom: 0;">
+                <div class="profile-avatar"><%= loginUser.getName()!=null?loginUser.getName().substring(0,1):"居" %></div>
+                <div>
+                    <div style="font-size:20px;font-weight:700;"><%= loginUser.getName()!=null?loginUser.getName():loginUser.getUsername() %></div>
+                    <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">账号：<%= loginUser.getUsername() %> &nbsp;|&nbsp;社区居民</div>
+                </div>
             </div>
+            <a href="/user/favorites" class="btn btn-primary" style="background: #ff4757; text-decoration: none;">❤️ 我的药品收藏夹</a>
         </div>
 
         <div class="section-title">编辑个人资料</div>
@@ -45,8 +47,7 @@
         </form>
     </div>
 
-    <!-- 修改密码 -->
-    <div class="profile-card">
+    <div class="profile-card" style="margin-top: 20px;">
         <div class="section-title">🔒 修改密码</div>
         <% if (pwdError != null) { %><div class="error-msg">⚠ <%= pwdError %></div><% } %>
         <form action="/user/profile/pwd" method="post">

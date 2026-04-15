@@ -23,12 +23,13 @@ public class UserController {
     @Autowired private EvaluationMapper evaluationMapper;
     @Autowired private DrugFavoriteMapper drugFavoriteMapper;
     @Autowired private BaseDataMapper baseDataMapper;
+    @Autowired private BannerMapper bannerMapper; // 注入轮播图 Mapper
+
     private User getLoginUser(HttpSession session) {
         if (!"user".equals(session.getAttribute("role"))) return null;
         return (User) session.getAttribute("loginUser");
     }
 
-    // ==================== 首页 ====================
     @GetMapping("/index")
     public String index(HttpSession session, Model model) {
         User user = getLoginUser(session);
@@ -36,10 +37,11 @@ public class UserController {
         model.addAttribute("myAppointCount",  appointmentMapper.listByUser(user.getId()).size());
         model.addAttribute("myCaseCount",     medicalCaseMapper.listByUser(user.getId()).size());
         model.addAttribute("noticeCount",     noticeMapper.countPublished());
+        // 加载首页轮播图传给前端
+        model.addAttribute("banners", bannerMapper.listAll());
         return "user/index";
     }
 
-    // ==================== 医生预约 ====================
     @GetMapping("/appointment")
     public String appointmentPage(HttpSession session, Model model) {
         User user = getLoginUser(session);
@@ -54,7 +56,7 @@ public class UserController {
         User user = getLoginUser(session);
         if (user == null) return "redirect:/login";
         appointment.setUserId(user.getId());
-        appointment.setStatus(0); // 待确认
+        appointment.setStatus(0);
         appointmentMapper.insert(appointment);
         return "redirect:/user/appointment";
     }
@@ -67,36 +69,28 @@ public class UserController {
         return "redirect:/user/appointment";
     }
 
-    // ==================== 医生信息与评价 ====================
     @GetMapping("/doctors")
     public String doctorsPage(HttpSession session, Model model) {
         if (getLoginUser(session) == null) return "redirect:/login";
-
         List<Doctor> doctors = doctorMapper.listAll();
         for (Doctor d : doctors) {
-            // 计算并设置平均分和总数
             d.setAvgScore(evaluationMapper.getAvgScore(d.getId()));
             d.setEvalCount(evaluationMapper.getCountByDoctor(d.getId()));
         }
-
         model.addAttribute("list", doctors);
         model.addAttribute("evalMapper", evaluationMapper);
         return "user/doctors";
     }
 
-    // 提交评价接口
     @PostMapping("/evaluate/add")
     public String addEvaluation(Evaluation eval, HttpSession session) {
         User user = getLoginUser(session);
         if (user == null) return "redirect:/login";
-
         eval.setUserId(user.getId());
         evaluationMapper.insert(eval);
-
         return "redirect:/user/doctors";
     }
 
-    // ==================== 我的病例 ====================
     @GetMapping("/cases")
     public String casesPage(HttpSession session, Model model) {
         User user = getLoginUser(session);
@@ -105,7 +99,6 @@ public class UserController {
         return "user/cases";
     }
 
-    // ==================== 药品查看 ====================
     @GetMapping("/drug")
     public String drugPage(HttpSession session, Model model,
                            @RequestParam(required = false) String keyword,
@@ -115,7 +108,6 @@ public class UserController {
 
         List<Drug> list;
         if (category != null && !category.isEmpty()) {
-            // 利用现有 search 逻辑或单独写分类查询
             list = drugMapper.search(category);
         } else if (keyword != null && !keyword.isEmpty()) {
             list = drugMapper.search(keyword);
@@ -123,7 +115,6 @@ public class UserController {
             list = drugMapper.listAll();
         }
 
-        // 为每个药品判断当前用户是否已收藏
         model.addAttribute("list", list);
         model.addAttribute("favMapper", drugFavoriteMapper);
         model.addAttribute("currentCategory", category);
@@ -145,7 +136,16 @@ public class UserController {
         }
     }
 
-    // ==================== 社区公告 ====================
+    // 个人中心调用：查询收藏夹
+    @GetMapping("/favorites")
+    public String favorites(HttpSession session, Model model) {
+        User user = getLoginUser(session);
+        if (user == null) return "redirect:/login";
+        model.addAttribute("list", drugMapper.listFavorites(user.getId()));
+        model.addAttribute("favMapper", drugFavoriteMapper);
+        return "user/favorites";
+    }
+
     @GetMapping("/notice")
     public String noticePage(HttpSession session, Model model) {
         if (getLoginUser(session) == null) return "redirect:/login";
@@ -153,7 +153,6 @@ public class UserController {
         return "user/notice";
     }
 
-    // ==================== 个人中心 ====================
     @GetMapping("/profile")
     public String profilePage(HttpSession session) {
         if (getLoginUser(session) == null) return "redirect:/login";
@@ -170,10 +169,7 @@ public class UserController {
     }
 
     @PostMapping("/profile/pwd")
-    public String changePwd(@RequestParam Integer id,
-                            @RequestParam String oldPwd,
-                            @RequestParam String newPwd,
-                            HttpSession session, Model model) {
+    public String changePwd(@RequestParam Integer id, @RequestParam String oldPwd, @RequestParam String newPwd, HttpSession session, Model model) {
         User user = getLoginUser(session);
         if (user == null) return "redirect:/login";
         if (!oldPwd.equals(user.getPassword())) {
@@ -184,7 +180,7 @@ public class UserController {
         session.setAttribute("loginUser", userMapper.getById(id));
         return "redirect:/user/profile";
     }
-    // ==================== 健康体征录入与预警 ====================
+
     @GetMapping("/health")
     public String healthPage(HttpSession session, Model model) {
         User user = getLoginUser(session);
@@ -197,20 +193,13 @@ public class UserController {
     public String healthAdd(HealthRecord record, HttpSession session) {
         User user = getLoginUser(session);
         if (user == null) return "redirect:/login";
-
         record.setUserId(user.getId());
-
-        // 核心亮点：自动医学阈值预警逻辑
-        int status = 0; // 默认0正常
-        // 血压预警：高压>140或<90，低压>90或<60
+        int status = 0;
         if (record.getSystolicBp() != null && (record.getSystolicBp() > 140 || record.getSystolicBp() < 90)) status = 1;
         if (record.getDiastolicBp() != null && (record.getDiastolicBp() > 90 || record.getDiastolicBp() < 60)) status = 1;
-        // 血糖预警：空腹血糖>7.0或<3.9
         if (record.getBloodSugar() != null && (record.getBloodSugar().doubleValue() > 7.0 || record.getBloodSugar().doubleValue() < 3.9)) status = 1;
-
         record.setStatus(status);
         healthRecordMapper.insert(record);
-
         return "redirect:/user/health";
     }
 }

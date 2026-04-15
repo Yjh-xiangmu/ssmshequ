@@ -6,7 +6,6 @@ import java.util.List;
 
 public interface DrugMapper {
 
-    // 定义映射规则，解决数据库下划线字段与 Java 驼峰属性不一致的问题
     @Select("SELECT * FROM drug ORDER BY id DESC")
     @Results(id = "drugMap", value = {
             @Result(property = "id",           column = "id"),
@@ -20,17 +19,22 @@ public interface DrugMapper {
             @Result(property = "expireDate",   column = "expire_date"),
             @Result(property = "remark",       column = "remark"),
             @Result(property = "ingredients",  column = "ingredients"),
-            @Result(property = "usageInfo",    column = "usage_info") // 关键映射点
+            @Result(property = "usageInfo",    column = "usage_info")
     })
     List<Drug> listAll();
 
     @Select("SELECT * FROM drug WHERE id=#{id}")
-    @ResultMap("drugMap") // 复用上面定义的 drugMap
+    @ResultMap("drugMap")
     Drug getById(Integer id);
 
     @Select("SELECT * FROM drug WHERE name LIKE CONCAT('%',#{keyword},'%') OR category LIKE CONCAT('%',#{keyword},'%')")
-    @ResultMap("drugMap") // 复用上面定义的 drugMap
+    @ResultMap("drugMap")
     List<Drug> search(String keyword);
+
+    // 联合查询用户收藏的药品
+    @Select("SELECT d.* FROM drug d JOIN drug_favorite f ON d.id = f.drug_id WHERE f.user_id = #{userId} ORDER BY f.create_time DESC")
+    @ResultMap("drugMap")
+    List<Drug> listFavorites(Integer userId);
 
     @Insert("INSERT INTO drug(name,category,spec,unit,stock,price,manufacturer,expire_date,remark,ingredients,usage_info) " +
             "VALUES(#{name},#{category},#{spec},#{unit},#{stock},#{price},#{manufacturer},#{expireDate},#{remark},#{ingredients},#{usageInfo})")

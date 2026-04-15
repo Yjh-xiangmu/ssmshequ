@@ -24,12 +24,12 @@ public class AdminController {
     @Autowired private BannerMapper bannerMapper;
     @Autowired private BaseDataMapper baseDataMapper;
 
-    // 权限检查
+    private final String UPLOAD_PATH = System.getProperty("user.dir") + "/upload/";
+
     private boolean noAuth(HttpSession session) {
         return session.getAttribute("loginUser") == null || !"admin".equals(session.getAttribute("role"));
     }
 
-    // ==================== 首页/数据总览 ====================
     @GetMapping("/index")
     public String index(HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
@@ -40,7 +40,6 @@ public class AdminController {
         return "admin/index";
     }
 
-    // ==================== 医生管理 ====================
     @GetMapping("/doctor")
     public String doctorList(HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
@@ -71,7 +70,6 @@ public class AdminController {
         return "redirect:/admin/doctor";
     }
 
-    // ==================== 用户管理 ====================
     @GetMapping("/user")
     public String userList(HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
@@ -100,19 +98,13 @@ public class AdminController {
         return "redirect:/admin/user";
     }
 
-    // ==================== 药品管理 ====================
     @GetMapping("/drug")
-    public String drugList(HttpSession session, Model model,
-                           @RequestParam(required = false) String keyword) {
+    public String drugList(HttpSession session, Model model, @RequestParam(required = false) String keyword) {
         if (noAuth(session)) return "redirect:/login";
-        List<Drug> list = (keyword != null && !keyword.isEmpty())
-                ? drugMapper.search(keyword) : drugMapper.listAll();
+        List<Drug> list = (keyword != null && !keyword.isEmpty()) ? drugMapper.search(keyword) : drugMapper.listAll();
         model.addAttribute("list", list);
         model.addAttribute("keyword", keyword);
-
-        // 关键修复：把药品分类从基础数据里查出来，传给前端的下拉框
         model.addAttribute("categories", baseDataMapper.listByType("drug_category"));
-
         return "admin/drug";
     }
 
@@ -137,7 +129,6 @@ public class AdminController {
         return "redirect:/admin/drug";
     }
 
-    // ==================== 社区公告 ====================
     @GetMapping("/notice")
     public String noticeList(HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
@@ -169,7 +160,6 @@ public class AdminController {
         return "redirect:/admin/notice";
     }
 
-    // ==================== 病例管理 ====================
     @GetMapping("/case")
     public String caseList(HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
@@ -201,7 +191,6 @@ public class AdminController {
         return "redirect:/admin/case";
     }
 
-    // ==================== 轮播图管理 ====================
     @GetMapping("/banner")
     public String bannerList(HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
@@ -209,9 +198,35 @@ public class AdminController {
         return "admin/banner";
     }
 
+    // 轮播图文件上传保存逻辑
     @PostMapping("/banner/add")
-    public String bannerAdd(Banner banner, HttpSession session) {
-        if (noAuth(session)) return "redirect:/login";
+    public String bannerAdd(Banner banner, @RequestParam("file") org.springframework.web.multipart.MultipartFile file, HttpSession session) {
+        if (!file.isEmpty()) {
+            try {
+                String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+                // 1. 存入 Tomcat 实时运行目录 (解决 404，保证上传后网页立刻能显示图片)
+                String targetPath = session.getServletContext().getRealPath("/upload/");
+                java.io.File targetDir = new java.io.File(targetPath);
+                if (!targetDir.exists()) targetDir.mkdirs();
+                java.io.File targetFile = new java.io.File(targetDir, fileName);
+                file.transferTo(targetFile); // 执行真实上传保存
+
+                // 2. 同步复制到 src 源码目录 (解决换电脑运行问题，保证图片能被 Git 追踪上传到 GitHub)
+                String srcPath = System.getProperty("user.dir") + "/src/main/webapp/upload/";
+                java.io.File srcDir = new java.io.File(srcPath);
+                if (!srcDir.exists()) srcDir.mkdirs();
+                java.io.File srcFile = new java.io.File(srcDir, fileName);
+
+                // 利用我们刚刚引入的 commons-io 工具包，把图片悄悄复制一份到源码里
+                org.apache.commons.io.FileUtils.copyFile(targetFile, srcFile);
+
+                // 数据库只存相对路径
+                banner.setImageUrl("/upload/" + fileName);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         if (banner.getStatus() == null) banner.setStatus(1);
         if (banner.getSortOrder() == null) banner.setSortOrder(0);
         bannerMapper.insert(banner);
@@ -232,7 +247,6 @@ public class AdminController {
         return "redirect:/admin/banner";
     }
 
-    // ==================== 基础数据 ====================
     @GetMapping("/basedata")
     public String basedataList(HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
@@ -262,7 +276,6 @@ public class AdminController {
         return "redirect:/admin/basedata";
     }
 
-    // ==================== 管理员管理 ====================
     @GetMapping("/admins")
     public String adminList(HttpSession session, Model model) {
         if (noAuth(session)) return "redirect:/login";
@@ -291,7 +304,6 @@ public class AdminController {
         return "redirect:/admin/admins";
     }
 
-    // ==================== 个人中心 ====================
     @GetMapping("/profile")
     public String profile(HttpSession session) {
         if (noAuth(session)) return "redirect:/login";
@@ -299,7 +311,7 @@ public class AdminController {
     }
 
     @PostMapping("/profile/save")
-    public String profileSave(Admin admin, HttpSession session, Model model) {
+    public String profileSave(Admin admin, HttpSession session) {
         if (noAuth(session)) return "redirect:/login";
         adminMapper.update(admin);
         Admin updated = adminMapper.getById(admin.getId());
