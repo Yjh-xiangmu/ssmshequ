@@ -109,15 +109,39 @@ public class AdminController {
     }
 
     @PostMapping("/drug/add")
-    public String drugAdd(Drug drug, HttpSession session) {
+    public String drugAdd(Drug drug, HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         if (noAuth(session)) return "redirect:/login";
+
+        // 后端拦截逻辑：库存不能为负数
+        if (drug.getStock() != null && drug.getStock() < 0) {
+            ra.addFlashAttribute("errorMsg", "添加失败：药品库存不能为负数");
+            return "redirect:/admin/drug";
+        }
+        // 后端拦截逻辑：价格不能为负数
+        if (drug.getPrice() != null && drug.getPrice().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            ra.addFlashAttribute("errorMsg", "添加失败：药品零售价不能为负数");
+            return "redirect:/admin/drug";
+        }
+
         drugMapper.insert(drug);
         return "redirect:/admin/drug";
     }
 
     @PostMapping("/drug/edit")
-    public String drugEdit(Drug drug, HttpSession session) {
+    public String drugEdit(Drug drug, HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         if (noAuth(session)) return "redirect:/login";
+
+        // 后端拦截逻辑：库存不能为负数
+        if (drug.getStock() != null && drug.getStock() < 0) {
+            ra.addFlashAttribute("errorMsg", "修改失败：药品库存不能为负数");
+            return "redirect:/admin/drug";
+        }
+        // 后端拦截逻辑：价格不能为负数
+        if (drug.getPrice() != null && drug.getPrice().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            ra.addFlashAttribute("errorMsg", "修改失败：药品零售价不能为负数");
+            return "redirect:/admin/drug";
+        }
+
         drugMapper.update(drug);
         return "redirect:/admin/drug";
     }
@@ -198,30 +222,21 @@ public class AdminController {
         return "admin/banner";
     }
 
-    // 轮播图文件上传保存逻辑
     @PostMapping("/banner/add")
     public String bannerAdd(Banner banner, @RequestParam("file") org.springframework.web.multipart.MultipartFile file, HttpSession session) {
         if (!file.isEmpty()) {
             try {
                 String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-
-                // 1. 存入 Tomcat 实时运行目录 (解决 404，保证上传后网页立刻能显示图片)
                 String targetPath = session.getServletContext().getRealPath("/upload/");
                 java.io.File targetDir = new java.io.File(targetPath);
                 if (!targetDir.exists()) targetDir.mkdirs();
                 java.io.File targetFile = new java.io.File(targetDir, fileName);
-                file.transferTo(targetFile); // 执行真实上传保存
-
-                // 2. 同步复制到 src 源码目录 (解决换电脑运行问题，保证图片能被 Git 追踪上传到 GitHub)
+                file.transferTo(targetFile);
                 String srcPath = System.getProperty("user.dir") + "/src/main/webapp/upload/";
                 java.io.File srcDir = new java.io.File(srcPath);
                 if (!srcDir.exists()) srcDir.mkdirs();
                 java.io.File srcFile = new java.io.File(srcDir, fileName);
-
-                // 利用我们刚刚引入的 commons-io 工具包，把图片悄悄复制一份到源码里
                 org.apache.commons.io.FileUtils.copyFile(targetFile, srcFile);
-
-                // 数据库只存相对路径
                 banner.setImageUrl("/upload/" + fileName);
             } catch (Exception e) {
                 e.printStackTrace();

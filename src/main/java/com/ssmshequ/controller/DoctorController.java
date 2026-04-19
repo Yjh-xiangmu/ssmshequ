@@ -34,7 +34,6 @@ public class DoctorController {
         Doctor doctor = getLoginDoctor(session);
         if (doctor == null) return "redirect:/login";
 
-        // 保留你写的今日预约数逻辑
         long todayCount = appointmentMapper.listByDoctor(doctor.getId())
                 .stream()
                 .filter(a -> {
@@ -55,7 +54,6 @@ public class DoctorController {
         model.addAttribute("appointCount", pendingCount);
         model.addAttribute("caseCount", caseCount);
 
-        // 新增：满意度统计
         Double avg = evaluationMapper.getAvgScore(doctor.getId());
         model.addAttribute("avgScore", avg != null ? avg : 0.0);
         model.addAttribute("evalCount", evaluationMapper.getCountByDoctor(doctor.getId()));
@@ -82,15 +80,11 @@ public class DoctorController {
         return "doctor/case";
     }
 
+    // 注释掉原本随意的 caseAdd，强制走预约闭环接诊流程
+    /*
     @PostMapping("/case/add")
-    public String caseAdd(MedicalCase medicalCase, HttpSession session) {
-        Doctor doctor = getLoginDoctor(session);
-        if (doctor == null) return "redirect:/login";
-        medicalCase.setDoctorId(doctor.getId());
-        medicalCase.setStatus(1);
-        medicalCaseMapper.insert(medicalCase);
-        return "redirect:/doctor/case";
-    }
+    public String caseAdd(MedicalCase medicalCase, HttpSession session) { ... }
+    */
 
     @PostMapping("/case/edit")
     public String caseEdit(MedicalCase medicalCase, HttpSession session) {
@@ -101,11 +95,15 @@ public class DoctorController {
         return "redirect:/doctor/case";
     }
 
-    // ==================== 预约管理 ====================
+    // ==================== 预约接诊管理 ====================
     @GetMapping("/appointment")
     public String appointmentList(HttpSession session, Model model) {
         Doctor doctor = getLoginDoctor(session);
         if (doctor == null) return "redirect:/login";
+
+        // 挂号列表加载前，自动清理过期订单
+        appointmentMapper.cleanExpiredAppointments();
+
         model.addAttribute("list", appointmentMapper.listByDoctor(doctor.getId()));
         return "doctor/appointment";
     }
@@ -124,10 +122,18 @@ public class DoctorController {
         return "redirect:/doctor/appointment";
     }
 
-    @GetMapping("/appointment/finish")
-    public String finishAppointment(@RequestParam Integer id, HttpSession session) {
-        if (getLoginDoctor(session) == null) return "redirect:/login";
-        appointmentMapper.updateStatus(id, 3);
+    // 替换原有的 finishAppointment 为 finishAndCase 闭环逻辑
+    @PostMapping("/appointment/finishAndCase")
+    public String finishAndCase(MedicalCase medicalCase, @RequestParam Integer appointmentId, HttpSession session) {
+        Doctor doctor = getLoginDoctor(session);
+        if (doctor == null) return "redirect:/login";
+
+        medicalCase.setVisitDate(new java.util.Date());
+        medicalCase.setDoctorId(doctor.getId());
+        medicalCase.setStatus(1);
+        medicalCaseMapper.insert(medicalCase);
+
+        appointmentMapper.updateStatus(appointmentId, 3);
         return "redirect:/doctor/appointment";
     }
 

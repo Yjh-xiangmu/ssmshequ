@@ -27,8 +27,20 @@
         <c:forEach items="${list}" var="d">
             <div class="fav-card" id="card_${d.id}">
                 <div class="fav-name">${d.name}</div>
-                <div class="fav-spec">${d.spec} / ${d.manufacturer}</div>
-                <div style="font-size: 13px; color: #7f8c8d; margin-bottom: 10px;">主要成分：<c:out value="${empty d.ingredients ? '详见说明书' : d.ingredients}"/></div>
+                <div class="fav-spec" style="border-bottom: 1px dashed #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                        ${d.spec} / ${d.manufacturer}
+                </div>
+
+                <div style="font-size: 13px; color: #555; margin-bottom: 6px; line-height: 1.5;">
+                    <strong style="color:#7f8c8d;">主要成分：</strong><br>
+                    <c:out value="${empty d.ingredients ? '详见药品包装说明书' : d.ingredients}"/>
+                </div>
+                <div style="font-size: 13px; color: #555; margin-bottom: 6px; line-height: 1.5;">
+                    <strong style="color:#7f8c8d;">用法用量：</strong><br>
+                    <c:out value="${empty d.usageInfo ? '请遵医嘱服用' : d.usageInfo}"/>
+                </div>
+
+
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
                     <div class="price-val">¥ ${d.price}</div>
                     <button class="btn-remove" onclick="removeFav(${d.id})">取消收藏</button>

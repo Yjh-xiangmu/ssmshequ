@@ -31,29 +31,48 @@
   <div class="health-container">
     <div class="health-form">
       <h3 class="page-title">录入今日体征</h3>
+
+      <c:if test="${not empty errorMsg}">
+        <div style="background:#fff2f0; border:1px solid #ffccc7; padding:10px; border-radius:4px; color:#ff4d4f; margin-bottom:15px; font-size:14px;">
+            ${errorMsg}
+        </div>
+      </c:if>
+
       <form action="/user/health/add" method="post">
         <div class="form-group">
-          <label>测量日期 (必填)</label>
-          <input type="date" name="recordDate" required>
+          <label>测量日期 (系统自动记录)</label>
+          <input type="date" name="recordDate" id="todayDate" required readonly style="background-color: #f5f5f5; color: #888;">
         </div>
         <div class="form-group">
-          <label>收缩压 / 高压 (mmHg)</label>
-          <input type="number" name="systolicBp" placeholder="正常参考值: 90-139">
+          <label>收缩压 / 高压 (mmHg) <span style="color:red">*</span></label>
+          <input type="number" name="systolicBp" placeholder="范围: 90-139" required>
         </div>
         <div class="form-group">
-          <label>舒张压 / 低压 (mmHg)</label>
-          <input type="number" name="diastolicBp" placeholder="正常参考值: 60-89">
+          <label>舒张压 / 低压 (mmHg) <span style="color:red">*</span></label>
+          <input type="number" name="diastolicBp" placeholder="范围: 60-89" required>
         </div>
         <div class="form-group">
-          <label>空腹血糖 (mmol/L)</label>
-          <input type="number" step="0.1" name="bloodSugar" placeholder="正常参考值: 3.9-6.1">
+          <label>空腹血糖 (mmol/L) <span style="color:red">*</span></label>
+          <input type="number" step="0.1" name="bloodSugar" placeholder="范围: 3.9-6.1" required>
         </div>
         <div class="form-group">
-          <label>心率 (次/分)</label>
-          <input type="number" name="heartRate" placeholder="正常参考值: 60-100">
+          <label>心率 (次/分) <span style="color:red">*</span></label>
+          <input type="number" name="heartRate" placeholder="范围: 60-100" required>
         </div>
         <button type="submit" class="btn-submit">保存数据并进行系统评估</button>
       </form>
+
+      <script>
+        const now = new Date();
+        // 获取本地时间的年、月、日
+        const y = now.getFullYear();
+        // 月份是从0开始的，所以要加1，并补齐两位
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+
+        // 拼接成符合 HTML5 date 控件要求的 yyyy-mm-dd 格式
+        document.getElementById('todayDate').value = y + '-' + m + '-' + d;
+      </script>
     </div>
 
     <div class="health-history">

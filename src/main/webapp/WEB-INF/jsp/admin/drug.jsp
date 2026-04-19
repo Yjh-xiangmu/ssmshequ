@@ -34,6 +34,13 @@
             <button class="btn btn-primary" onclick="openAdd()" style="padding: 10px 20px; border-radius: 8px;">＋ 新增药品档案</button>
         </div>
 
+        <%-- 错误信息展示区域 --%>
+        <c:if test="${not empty errorMsg}">
+            <div style="background:#fff2f0; border:1px solid #ffccc7; padding:12px; border-radius:4px; color:#ff4d4f; margin-bottom:20px;">
+                <strong>⚠️ 错误：</strong> ${errorMsg}
+            </div>
+        </c:if>
+
         <div class="card">
             <div class="card-header">
                 <form action="/admin/drug" method="get" class="search-bar" style="display: flex; gap: 10px;">
@@ -118,8 +125,9 @@
                 <div class="form-group"><label>包装单位</label><input name="unit" placeholder="如: 盒/瓶/支"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>初始库存</label><input name="stock" type="number" value="0"></div>
-                <div class="form-group"><label>单价(元)</label><input name="price" type="number" step="0.01"></div>
+                <%-- 前端约束：加入 min="0" 限制 --%>
+                <div class="form-group"><label>初始库存</label><input name="stock" type="number" value="0" min="0" required></div>
+                <div class="form-group"><label>单价(元)</label><input name="price" type="number" step="0.01" min="0.00" required></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>生产厂家</label><input name="manufacturer"></div>
@@ -166,8 +174,9 @@
                 <div class="form-group"><label>单位</label><input name="unit" id="eUnit"></div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>库存数量</label><input name="stock" id="eStock" type="number"></div>
-                <div class="form-group"><label>单价(元)</label><input name="price" id="ePrice" type="number" step="0.01"></div>
+                <%-- 前端约束：加入 min="0" 限制 --%>
+                <div class="form-group"><label>库存数量</label><input name="stock" id="eStock" type="number" min="0" required></div>
+                <div class="form-group"><label>单价(元)</label><input name="price" id="ePrice" type="number" step="0.01" min="0.00" required></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>生产厂家</label><input name="manufacturer" id="eMfr"></div>
@@ -194,13 +203,9 @@
 </div>
 
 <script>
-    // 开启新增弹窗
     function openAdd() { document.getElementById('addModal').classList.add('show'); }
-
-    // 关闭指定弹窗
     function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-    // 开启编辑弹窗并回显数据
     function openEdit(id, name, cat, spec, unit, stock, price, mfr, expire, remark) {
         document.getElementById('eId').value = id;
         document.getElementById('eName').value = name;
@@ -213,14 +218,12 @@
         document.getElementById('eExpire').value = expire;
         document.getElementById('eRemark').value = remark;
 
-        // 特别修复：从隐藏文本域读取成分和用法，避免JS特殊字符报错
         document.getElementById('eIng').value = document.getElementById('ing_' + id).value;
         document.getElementById('eUsage').value = document.getElementById('usa_' + id).value;
 
         document.getElementById('editModal').classList.add('show');
     }
 
-    // 点击遮罩层关闭
     document.querySelectorAll('.modal-backdrop').forEach(m => {
         m.addEventListener('click', e => { if(e.target === m) m.classList.remove('show'); });
     });

@@ -20,14 +20,19 @@
 
         .eval-preview { background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 15px 0; font-size: 13px; }
         .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-main { flex: 1; padding: 10px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-main { flex: 1; padding: 10px; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: 0.3s; font-size: 13px;}
         .btn-outline { background: #fff; border: 1px solid #4facfe; color: #4facfe; }
         .btn-fill { background: #4facfe; color: #fff; }
+        .btn-write { background: #f39c12; color: #fff; }
 
         /* 弹窗样式 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content { background: #fff; width: 500px; max-height: 80vh; border-radius: 20px; padding: 30px; position: relative; overflow-y: auto; }
         .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: #999; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -61,13 +66,14 @@
                 </div>
 
                 <div class="btn-group">
-                    <button class="btn-main btn-outline" onclick="showDetail(${d.id})">查看详细评价</button>
-                    <button class="btn-main btn-fill" onclick="location.href='/user/appointment'">预约挂号</button>
+                    <button class="btn-main btn-outline" onclick="showDetail('detail_${d.id}')">查看评价</button>
+                    <button class="btn-main btn-write" onclick="showWrite('write_${d.id}')">写评价</button>
+                    <button class="btn-main btn-fill" onclick="location.href='/user/appointment'">去挂号</button>
                 </div>
 
-                <div id="modal_${d.id}" class="modal">
+                <div id="detail_${d.id}" class="modal">
                     <div class="modal-content">
-                        <span class="close-btn" onclick="closeDetail(${d.id})">&times;</span>
+                        <span class="close-btn" onclick="closeModal('detail_${d.id}')">&times;</span>
                         <h3 style="margin-bottom: 20px;">${d.name} 医生的全部评价</h3>
                         <c:forEach items="${latestEval}" var="ev">
                             <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
@@ -80,17 +86,53 @@
                                 </div>
                             </div>
                         </c:forEach>
+                        <c:if test="${empty latestEval}">
+                            <div style="color: #999; text-align: center; padding: 20px;">该医生暂无评价</div>
+                        </c:if>
                     </div>
                 </div>
+
+                <div id="write_${d.id}" class="modal">
+                    <div class="modal-content">
+                        <span class="close-btn" onclick="closeModal('write_${d.id}')">&times;</span>
+                        <h3 style="margin-bottom: 20px;">评价 ${d.name} 医生</h3>
+                        <form action="/user/evaluate/add" method="post">
+                            <input type="hidden" name="doctorId" value="${d.id}">
+                            <div class="form-group">
+                                <label>满意度打分</label>
+                                <select name="score" required>
+                                    <option value="5">⭐⭐⭐⭐⭐ 非常满意 (5分)</option>
+                                    <option value="4">⭐⭐⭐⭐ 满意 (4分)</option>
+                                    <option value="3">⭐⭐⭐ 一般 (3分)</option>
+                                    <option value="2">⭐⭐ 不满意 (2分)</option>
+                                    <option value="1">⭐ 非常不满意 (1分)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>评价内容</label>
+                                <textarea name="content" rows="4" required placeholder="请详细描述您的就诊体验，您的评价将帮助更多居民..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-main btn-fill" style="width: 100%;">提交评价</button>
+                        </form>
+                    </div>
+                </div>
+
             </div>
         </c:forEach>
     </div>
 </div>
 
 <script>
-    function showDetail(id) { document.getElementById('modal_' + id).style.display = 'flex'; }
-    function closeDetail(id) { document.getElementById('modal_' + id).style.display = 'none'; }
-    window.onclick = function(event) { if (event.target.className === 'modal') event.target.style.display = 'none'; }
+    function showDetail(id) { document.getElementById(id).style.display = 'flex'; }
+    function showWrite(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // 点击遮罩层关闭弹窗
+    window.onclick = function(event) {
+        if (event.target.className === 'modal') {
+            event.target.style.display = 'none';
+        }
+    }
 </script>
 </body>
 </html>

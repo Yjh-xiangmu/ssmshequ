@@ -23,7 +23,7 @@ public class UserController {
     @Autowired private EvaluationMapper evaluationMapper;
     @Autowired private DrugFavoriteMapper drugFavoriteMapper;
     @Autowired private BaseDataMapper baseDataMapper;
-    @Autowired private BannerMapper bannerMapper; // 注入轮播图 Mapper
+    @Autowired private BannerMapper bannerMapper;
 
     private User getLoginUser(HttpSession session) {
         if (!"user".equals(session.getAttribute("role"))) return null;
@@ -37,7 +37,6 @@ public class UserController {
         model.addAttribute("myAppointCount",  appointmentMapper.listByUser(user.getId()).size());
         model.addAttribute("myCaseCount",     medicalCaseMapper.listByUser(user.getId()).size());
         model.addAttribute("noticeCount",     noticeMapper.countPublished());
-        // 加载首页轮播图传给前端
         model.addAttribute("banners", bannerMapper.listAll());
         return "user/index";
     }
@@ -46,18 +45,34 @@ public class UserController {
     public String appointmentPage(HttpSession session, Model model) {
         User user = getLoginUser(session);
         if (user == null) return "redirect:/login";
+
+        // 进页面前自动清理超时挂号
+        appointmentMapper.cleanExpiredAppointments();
+
         model.addAttribute("myList",    appointmentMapper.listByUser(user.getId()));
         model.addAttribute("doctors",   doctorMapper.listAll());
         return "user/appointment";
     }
 
     @PostMapping("/appointment/add")
-    public String appointmentAdd(Appointment appointment, HttpSession session) {
+    public String appointmentAdd(Appointment appointment, HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         User user = getLoginUser(session);
         if (user == null) return "redirect:/login";
+
+        // 提交前再次清理超时数据，确保判定准确
+        appointmentMapper.cleanExpiredAppointments();
+
+        // 检查医生是否空闲
+        int busyCount = appointmentMapper.checkDoctorBusy(appointment.getDoctorId());
+        if (busyCount > 0) {
+            ra.addFlashAttribute("errorMsg", "当前医生正忙（已有接诊或排队），请稍后再试");
+            return "redirect:/user/appointment";
+        }
+
+        // 直接插入即时挂号数据
         appointment.setUserId(user.getId());
-        appointment.setStatus(0);
-        appointmentMapper.insert(appointment);
+        appointmentMapper.insertInstant(appointment);
+
         return "redirect:/user/appointment";
     }
 
@@ -136,7 +151,6 @@ public class UserController {
         }
     }
 
-    // 个人中心调用：查询收藏夹
     @GetMapping("/favorites")
     public String favorites(HttpSession session, Model model) {
         User user = getLoginUser(session);
@@ -190,14 +204,31 @@ public class UserController {
     }
 
     @PostMapping("/health/add")
-    public String healthAdd(HealthRecord record, HttpSession session) {
+    public String healthAdd(HealthRecord record, HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
         User user = getLoginUser(session);
         if (user == null) return "redirect:/login";
+
+        // 修改此处逻辑：只要有一项没填，就提示必须全填
+        if (record.getSystolicBp() == null || record.getDiastolicBp() == null ||
+                record.getBloodSugar() == null || record.getHeartRate() == null) {
+            ra.addFlashAttribute("errorMsg", "为了确保评估准确，请完整填写所有体征指标（血压、血糖、心率）");
+            return "redirect:/user/health";
+        }
+
         record.setUserId(user.getId());
+
+        // 自动记录当前日期
+        if (record.getRecordDate() == null) {
+            record.setRecordDate(new java.util.Date());
+        }
+
+        // 评估逻辑：任何一项不在范围内即为异常 (status=1)
         int status = 0;
-        if (record.getSystolicBp() != null && (record.getSystolicBp() > 140 || record.getSystolicBp() < 90)) status = 1;
-        if (record.getDiastolicBp() != null && (record.getDiastolicBp() > 90 || record.getDiastolicBp() < 60)) status = 1;
-        if (record.getBloodSugar() != null && (record.getBloodSugar().doubleValue() > 7.0 || record.getBloodSugar().doubleValue() < 3.9)) status = 1;
+        if (record.getSystolicBp() > 140 || record.getSystolicBp() < 90) status = 1;
+        if (record.getDiastolicBp() > 90 || record.getDiastolicBp() < 60) status = 1;
+        if (record.getBloodSugar().doubleValue() > 7.0 || record.getBloodSugar().doubleValue() < 3.9) status = 1;
+        if (record.getHeartRate() > 100 || record.getHeartRate() < 60) status = 1;
+
         record.setStatus(status);
         healthRecordMapper.insert(record);
         return "redirect:/user/health";
