@@ -40,4 +40,7 @@ public class Doctor {
     public void setIntro(String intro) { this.intro = intro; }
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }
+    private Integer workStatus;
+    public Integer getWorkStatus() { return workStatus; }
+    public void setWorkStatus(Integer workStatus) { this.workStatus = workStatus; }
 }

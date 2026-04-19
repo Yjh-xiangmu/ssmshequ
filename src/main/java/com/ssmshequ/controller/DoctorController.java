@@ -34,6 +34,11 @@ public class DoctorController {
         Doctor doctor = getLoginDoctor(session);
         if (doctor == null) return "redirect:/login";
 
+        // 【关键修复 1】每次进入首页，单独去查一次真实状态，强制同步给当前账号，避开MyBatis映射丢失的问题
+        Integer dbStatus = doctorMapper.getWorkStatusById(doctor.getId());
+        doctor.setWorkStatus(dbStatus == null ? 0 : dbStatus);
+        session.setAttribute("loginUser", doctor);
+
         long todayCount = appointmentMapper.listByDoctor(doctor.getId())
                 .stream()
                 .filter(a -> {
@@ -61,6 +66,25 @@ public class DoctorController {
         return "doctor/index";
     }
 
+    // ==================== 切换出诊/休息状态 ====================
+    @GetMapping("/work/toggle")
+    public String toggleWorkStatus(HttpSession session) {
+        Doctor doc = getLoginDoctor(session);
+        if (doc == null) return "redirect:/login";
+
+        // 状态取反：0变1，1变0
+        int newStatus = (doc.getWorkStatus() == null || doc.getWorkStatus() == 0) ? 1 : 0;
+
+        // 更新数据库
+        doctorMapper.updateWorkStatus(doc.getId(), newStatus);
+
+        // 【关键修复 2】手动把新状态精准赋值给当前登录的医生对象，不再依赖全量查询的可能丢失
+        doc.setWorkStatus(newStatus);
+        session.setAttribute("loginUser", doc);
+
+        return "redirect:/doctor/index";
+    }
+
     // ==================== 评价管理 ====================
     @GetMapping("/evaluation")
     public String evaluationPage(HttpSession session, Model model) {
@@ -79,12 +103,6 @@ public class DoctorController {
         model.addAttribute("users", userMapper.listAll());
         return "doctor/case";
     }
-
-    // 注释掉原本随意的 caseAdd，强制走预约闭环接诊流程
-    /*
-    @PostMapping("/case/add")
-    public String caseAdd(MedicalCase medicalCase, HttpSession session) { ... }
-    */
 
     @PostMapping("/case/edit")
     public String caseEdit(MedicalCase medicalCase, HttpSession session) {
@@ -122,7 +140,6 @@ public class DoctorController {
         return "redirect:/doctor/appointment";
     }
 
-    // 替换原有的 finishAppointment 为 finishAndCase 闭环逻辑
     @PostMapping("/appointment/finishAndCase")
     public String finishAndCase(MedicalCase medicalCase, @RequestParam Integer appointmentId, HttpSession session) {
         Doctor doctor = getLoginDoctor(session);

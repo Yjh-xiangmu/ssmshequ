@@ -49,8 +49,10 @@ public class UserController {
         // 进页面前自动清理超时挂号
         appointmentMapper.cleanExpiredAppointments();
 
-        model.addAttribute("myList",    appointmentMapper.listByUser(user.getId()));
-        model.addAttribute("doctors",   doctorMapper.listAll());
+        model.addAttribute("myList", appointmentMapper.listByUser(user.getId()));
+
+        // 修改点：只把“正在出诊”的医生传给前端页面
+        model.addAttribute("doctors", doctorMapper.listWorkingDoctors());
         return "user/appointment";
     }
 

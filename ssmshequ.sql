@@ -11,7 +11,7 @@
  Target Server Version : 80026
  File Encoding         : 65001
 
- Date: 17/04/2026 17:08:04
+ Date: 20/04/2026 00:09:47
 */
 
 SET NAMES utf8mb4;
@@ -26,9 +26,9 @@ CREATE TABLE `admin`  (
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '登录账号',
   `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '登录密码',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '管理员姓名',
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '联系电话',
+  `phone` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '联系电话',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '管理员表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '管理员表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of admin
@@ -49,13 +49,17 @@ CREATE TABLE `appointment`  (
   `status` tinyint NULL DEFAULT 0 COMMENT '状态 0待确认 1已确认 2已取消 3已完成',
   `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '预约表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '预约表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of appointment
 -- ----------------------------
-INSERT INTO `appointment` VALUES (1, 1, 1, '2026-04-15', '上午 09:00-10:00', '感冒发烧', 3, '2026-04-14 08:00:00');
-INSERT INTO `appointment` VALUES (2, 1, 2, '2026-04-15', '上午 08:00-09:00', 'emmmmm', 0, '2026-04-14 14:10:05');
+INSERT INTO `appointment` VALUES (4, 2, 1, '2026-04-17', '17:54:13', '啊啊啊啊啊', 2, '2026-04-17 17:54:13');
+INSERT INTO `appointment` VALUES (5, 2, 2, '2026-04-17', '18:13:07', '啊', 2, '2026-04-17 18:13:07');
+INSERT INTO `appointment` VALUES (6, 2, 1, '2026-04-17', '18:13:12', '啊', 3, '2026-04-17 18:13:12');
+INSERT INTO `appointment` VALUES (7, 1, 2, '2026-04-17', '18:15:33', '啊', 2, '2026-04-17 18:15:33');
+INSERT INTO `appointment` VALUES (8, 1, 1, '2026-04-17', '18:15:36', '啊', 2, '2026-04-17 18:15:36');
+INSERT INTO `appointment` VALUES (9, 1, 1, '2026-04-17', '18:27:08', '1', 1, '2026-04-17 18:27:08');
 
 -- ----------------------------
 -- Table structure for banner
@@ -69,7 +73,7 @@ CREATE TABLE `banner`  (
   `sort_order` int NULL DEFAULT 0 COMMENT '显示顺序',
   `status` tinyint NULL DEFAULT 1 COMMENT '状态 1启用 0禁用',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '轮播图表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '轮播图表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of banner
@@ -88,7 +92,7 @@ CREATE TABLE `base_data`  (
   `sort_order` int NULL DEFAULT 0 COMMENT '排序',
   `status` tinyint NULL DEFAULT 1 COMMENT '状态',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '基础数据表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '基础数据表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of base_data
@@ -118,14 +122,15 @@ CREATE TABLE `doctor`  (
   `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '职称',
   `intro` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '简介',
   `status` tinyint NULL DEFAULT 1 COMMENT '状态 1在职 0离职',
+  `work_status` int NULL DEFAULT 0 COMMENT '0: 休息, 1: 出诊',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '医生表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '医生表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of doctor
 -- ----------------------------
-INSERT INTO `doctor` VALUES (1, '10001', 'doctor01', '123456', '张医生1', '男', '13900139000', '内科', '主治医师', '从事内科临床工作10年', 1);
-INSERT INTO `doctor` VALUES (2, '10002', '10002', '123456', '张医生2', '男', '10002', '内科', '副主任', '牛逼', 1);
+INSERT INTO `doctor` VALUES (1, '10001', 'doctor01', '123456', '张医生1', '男', '13900139000', '内科', '主治医师', '从事内科临床工作10年', 1, 1);
+INSERT INTO `doctor` VALUES (2, '10002', '10002', '123456', '张医生2', '男', '10002', '内科', '副主任', '牛逼', 1, 0);
 
 -- ----------------------------
 -- Table structure for drug
@@ -145,7 +150,7 @@ CREATE TABLE `drug`  (
   `ingredients` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '主要成分',
   `usage_info` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用法用量',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '药品表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '药品表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of drug
@@ -164,13 +169,14 @@ CREATE TABLE `drug_favorite`  (
   `drug_id` int NOT NULL COMMENT '药品ID',
   `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '居民药品收藏表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '居民药品收藏表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of drug_favorite
 -- ----------------------------
 INSERT INTO `drug_favorite` VALUES (1, 2, 3, '2026-04-14 15:07:48');
 INSERT INTO `drug_favorite` VALUES (2, 1, 3, '2026-04-16 00:40:22');
+INSERT INTO `drug_favorite` VALUES (4, 2, 1, '2026-04-17 18:23:47');
 
 -- ----------------------------
 -- Table structure for evaluation
@@ -184,7 +190,7 @@ CREATE TABLE `evaluation`  (
   `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '文字评价',
   `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '医生评价表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '医生评价表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of evaluation
@@ -193,6 +199,7 @@ INSERT INTO `evaluation` VALUES (1, 1, 2, 5, '好a', '2026-04-14 14:36:53');
 INSERT INTO `evaluation` VALUES (2, 1, 1, 5, '好！！！！！！！！！！！！！！\r\n', '2026-04-14 14:37:11');
 INSERT INTO `evaluation` VALUES (3, 2, 2, 1, 'emmmmmmm', '2026-04-14 14:38:20');
 INSERT INTO `evaluation` VALUES (4, 2, 2, 1, '？', '2026-04-14 14:38:36');
+INSERT INTO `evaluation` VALUES (5, 2, 2, 5, '啊', '2026-04-19 00:05:45');
 
 -- ----------------------------
 -- Table structure for health_record
@@ -209,12 +216,14 @@ CREATE TABLE `health_record`  (
   `status` tinyint NULL DEFAULT 0 COMMENT '状态: 0正常 1异常预警',
   `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '健康体征记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '健康体征记录表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of health_record
 -- ----------------------------
 INSERT INTO `health_record` VALUES (1, 1, '2026-04-14', 170, 90, 7.20, 110, 1, '2026-04-14 14:27:38');
+INSERT INTO `health_record` VALUES (2, 2, '2026-04-17', 110, NULL, NULL, NULL, 0, '2026-04-17 18:29:44');
+INSERT INTO `health_record` VALUES (3, 2, '2026-04-17', 1, 1, 1.00, 1, 1, '2026-04-17 18:32:52');
 
 -- ----------------------------
 -- Table structure for medical_case
@@ -232,13 +241,14 @@ CREATE TABLE `medical_case`  (
   `status` tinyint NULL DEFAULT 1 COMMENT '状态 1正常 0已归档',
   `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0),
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '病例表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '病例表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of medical_case
 -- ----------------------------
 INSERT INTO `medical_case` VALUES (1, 1, 1, '2026-04-14', '头痛发热两天', '上呼吸道感染', '阿莫西林胶囊 0.5g tid po，布洛芬片退热', '注意休息多喝水', 1, '2026-04-01 10:30:00');
 INSERT INTO `medical_case` VALUES (2, 1, 1, '2026-04-14', '写毕设要疯了啊', '脑子坏了', '刷会抖音就好了', 'ok', 1, '2026-04-14 13:22:56');
+INSERT INTO `medical_case` VALUES (3, 2, 1, '2026-04-17', '测试', '测试', '测试', '测试', 1, '2026-04-17 18:15:08');
 
 -- ----------------------------
 -- Table structure for notice
@@ -253,7 +263,7 @@ CREATE TABLE `notice`  (
   `status` tinyint NULL DEFAULT 1 COMMENT '状态 1已发布 0草稿',
   `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '社区公告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '社区公告表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of notice
@@ -273,7 +283,7 @@ CREATE TABLE `user`  (
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '真实姓名',
   `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '联系电话',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '居民用户表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '居民用户表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of user

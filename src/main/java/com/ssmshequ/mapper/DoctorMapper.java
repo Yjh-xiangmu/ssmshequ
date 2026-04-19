@@ -49,4 +49,16 @@ public interface DoctorMapper {
 
     @Select("SELECT COUNT(*) FROM doctor WHERE status=1")
     int countActive();
+    // 修改医生出诊状态
+    @Update("UPDATE doctor SET work_status = #{status} WHERE id = #{id}")
+    void updateWorkStatus(@Param("id") Integer id, @Param("status") Integer status);
+
+    // 查询所有账号正常且正在出诊的医生
+    @Select("SELECT * FROM doctor WHERE status = 1 AND work_status = 1")
+    List<Doctor> listWorkingDoctors();
+    // 增加这个方法：精准获取状态数字
+    @Select("SELECT work_status FROM doctor WHERE id = #{id}")
+    Integer getWorkStatusById(Integer id);
+
+    // (保留你之前已经加进去的 updateWorkStatus 和 listWorkingDoctors)
 }

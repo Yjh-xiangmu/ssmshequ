@@ -25,7 +25,26 @@
 <div class="main">
     <%@ include file="/WEB-INF/jsp/doctor/common/header.jsp" %>
     <div class="content">
-
+        <div class="card" style="margin-bottom: 20px; background: ${loginUser.workStatus == 1 ? '#f6ffed' : '#fff7e6'}; border: 1px solid ${loginUser.workStatus == 1 ? '#b7eb8f' : '#ffd591'};">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+                <div>
+                    <span style="font-size: 16px; font-weight: bold; color: #333;">当前工作状态：</span>
+                    <c:choose>
+                        <c:when test="${loginUser.workStatus == 1}">
+                            <span style="color: #52c41a; font-weight: bold;">● 正在出诊中</span>
+                            <small style="color: #888; margin-left: 10px;">(居民现在的挂号列表中能看到您)</small>
+                        </c:when>
+                        <c:otherwise>
+                            <span style="color: #fa8c16; font-weight: bold;">○ 休息中</span>
+                            <small style="color: #888; margin-left: 10px;">(居民暂时无法向您挂号)</small>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                <a href="/doctor/work/toggle" class="btn ${loginUser.workStatus == 1 ? 'btn-danger' : 'btn-success'}" style="text-decoration: none; padding: 8px 20px; border-radius: 6px;">
+                    ${loginUser.workStatus == 1 ? '结束出诊 (休息)' : '开始出诊 (上班)'}
+                </a>
+            </div>
+        </div>
         <div class="welcome-card">
             <div class="welcome-title">您好，${loginUser.name} 医生 👨‍⚕️</div>
             <div class="welcome-sub">欢迎回到系统。守护社区健康，您辛苦了。当前时间：<fmt:formatDate value="<%= new java.util.Date() %>" pattern="yyyy年MM月dd日 E"/></div>
